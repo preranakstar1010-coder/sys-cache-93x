@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>You’re Not Clicking This</title>
+
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    background: #0e0e11;
+    color: #eaeaea;
+    font-family: system-ui, monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  #arena {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  #target {
+    position: absolute;
+    padding: 14px 22px;
+    border: 1px solid #ff5c8a;
+    border-radius: 10px;
+    background: transparent;
+    color: #ff5c8a;
+    cursor: pointer;
+    transition: transform 0.08s linear;
+    user-select: none;
+  }
+
+  #roast {
+    position: fixed;
+    bottom: 30px;
+    width: 100%;
+    text-align: center;
+    font-size: 1rem;
+    color: #aaa;
+  }
+
+  .final {
+    color: #111;
+    background: #ffd6e7;
+  }
+  .frame {
+  margin-top: 30px;
+  display: inline-block;
+  padding: 12px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+  transform: rotate(-2deg);
+}
+
+.frame img {
+  width: 220px;
+  height: auto;
+  border-radius: 10px;
+  display: block;
+}
+
+</style>
+</head>
+
+<body>
+<div id="arena">
+  <div id="target">Click me</div>
+  <div id="roast">You really think this is going to be easy?</div>
+</div>
+
+<script>
+const target = document.getElementById("target");
+const roast = document.getElementById("roast");
+
+let attempts = 0;
+let learned = 0;
+
+const roasts = [
+  "Too slow.",
+  "That hesitation was embarrassing.",
+  "You chase like you debug.",
+  "Predictable.",
+  "I already knew you’d try that."
+];
+
+function moveSmart(e) {
+  const rect = target.getBoundingClientRect();
+  const dx = e.clientX - rect.left;
+  const dy = e.clientY - rect.top;
+
+  const distance = Math.hypot(dx, dy);
+
+  if (distance < 120) {
+    const angle = Math.atan2(dy, dx);
+    const escapeX = Math.cos(angle) * -180;
+    const escapeY = Math.sin(angle) * -180;
+
+    let x = rect.left + escapeX;
+    let y = rect.top + escapeY;
+
+    x = Math.max(20, Math.min(window.innerWidth - 120, x));
+    y = Math.max(20, Math.min(window.innerHeight - 60, y));
+
+    target.style.left = x + "px";
+    target.style.top = y + "px";
+
+    roast.textContent = roasts[learned % roasts.length];
+    learned++;
+  }
+}
+
+document.addEventListener("mousemove", moveSmart);
+
+target.addEventListener("click", () => {
+  attempts++;
+
+  if (attempts < 7) {
+    roast.textContent = "Nice try. That didn’t count.";
+    return;
+  }
+
+  endGame();
+});
+
+function endGame() {
+  document.removeEventListener("mousemove", moveSmart);
+
+  document.body.classList.add("final");
+  document.body.innerHTML = `
+    <div style="text-align:center; padding:40px;">
+      <h1>You win.</h1>
+      <p>
+        Not because you caught me.<br>
+        But because you never stopped trying.
+      </p>
+      <p>
+        1 year 11 months ago,<br>
+        you already had me.
+      </p>
+
+      <div class="frame">
+        <img src="us.jpeg" alt="us">
+      </div>
+
+      <p style="margin-top:20px;">
+        — your annoying genius girlfriend 💖
+      </p>
+    </div>
+  `;
+}
+
+
+// initial position
+target.style.left = "50%";
+target.style.top = "40%";
+</script>
+</body>
+</html>
